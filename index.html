@@ -20,8 +20,20 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <!-- Schriften laden im Hintergrund. Sind sie langsam erreichbar, zeigt der
+       Browser zuerst die Ersatzschriften an, statt die ganze Seite anzuhalten. -->
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Pinyon+Script&display=swap">
+  <noscript>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Pinyon+Script&display=swap">
+  </noscript>
   <link rel="stylesheet" href="flatpickr.min.css">
+  <script>
+    /* Kennzeichnet, dass JavaScript laeuft — erst dann wird die
+       Start-Vorschau ueberhaupt sichtbar. */
+    document.documentElement.className += ' js';
+  </script>
 
   <style>
     /* ── TOKENS ── */
@@ -51,6 +63,41 @@
     button { cursor: pointer; border: none; background: none; font-family: inherit; }
     address { font-style: normal; }
 
+    /* ── START-VORSCHAU ──
+       Bewusst display:none. Erst wenn JavaScript laeuft, wird die
+       Vorschau eingeblendet — ohne JavaScript kann sie die Seite
+       also niemals blockieren. */
+    #vorschau {
+      position: fixed; inset: 0; z-index: 10000;
+      display: none;
+      place-items: center;
+      background: var(--bg-0);
+      transition: opacity .6s ease, visibility .6s ease;
+    }
+    .js #vorschau { display: grid; }
+    #vorschau img {
+      width: min(420px, 72vw); height: auto;
+      animation: vorschauAtmen 2.4s ease-in-out infinite;
+    }
+    #vorschau.weg { opacity: 0; visibility: hidden; pointer-events: none; }
+    @keyframes vorschauAtmen {
+      0%, 100% { transform: scale(.97); opacity: .8; }
+      50%      { transform: scale(1);   opacity: 1; }
+    }
+    /* Solange die Vorschau liegt: nicht dahinter scrollen, und die
+       Navigation ausblenden. Fest positionierte Elemente koennen sich
+       je nach Browser ueber die Vorschau legen, obwohl ihre Ebene
+       niedriger liegt — das hier ist eindeutig und blendet die
+       Navigation anschliessend sanft ein. */
+    body.vorschau-an { overflow: hidden; }
+    body.vorschau-an #nav { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #vorschau img { animation: none; }
+      #vorschau { transition: none; }
+    }
+    @media print { #vorschau { display: none !important; } }
+
     /* ── FILM GRAIN ── */
     body::after {
       content: '';
@@ -78,7 +125,8 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 900;
       padding: 1.4rem clamp(1.5rem,5vw,5rem);
       display: flex; align-items: center; justify-content: space-between;
-      transition: background .4s, padding .4s, border-color .4s;
+      transition: background .4s, padding .4s, border-color .4s,
+                  opacity .5s ease, visibility .5s ease;
       border-bottom: 1px solid transparent;
     }
     #nav.sc {
@@ -352,6 +400,44 @@
   </style>
 </head>
 <body>
+
+<!-- Start-Vorschau mit dem Logo -->
+<div id="vorschau" aria-hidden="true">
+  <img src="logo-splash.png" alt="" width="560" height="560">
+</div>
+<script>
+/* Start-Vorschau: liegt mindestens 3 Sekunden, verschwindet aber erst,
+   wenn die Seite geladen ist. Der Notausstieg loest sie spaetestens nach
+   6 Sekunden auf — die Seite bleibt also nie dauerhaft verdeckt.
+   Steht bewusst direkt hinter der Vorschau, damit die Zeit ab dem
+   frueheste moeglichen Moment laeuft. */
+(function () {
+  var v = document.getElementById('vorschau');
+  if (!v) return;
+
+  var MINDESTENS = 3000;
+  var NOTAUS     = 6000;
+  var start = Date.now();
+  var erledigt = false;
+
+  document.body.classList.add('vorschau-an');
+
+  function weg() {
+    if (erledigt) return;
+    erledigt = true;
+    var rest = Math.max(0, MINDESTENS - (Date.now() - start));
+    setTimeout(function () {
+      v.classList.add('weg');
+      document.body.classList.remove('vorschau-an');
+      setTimeout(function () { if (v.parentNode) v.parentNode.removeChild(v); }, 700);
+    }, rest);
+  }
+
+  if (document.readyState === 'complete') weg();
+  else window.addEventListener('load', weg);
+  setTimeout(weg, NOTAUS);
+})();
+</script>
 
 <!-- ── NAV ── -->
 <nav id="nav" role="navigation" aria-label="Hauptnavigation">
@@ -793,7 +879,8 @@ if (kalenderInstanz) kalenderInstanz.destroy();
 kalenderInstanz = flatpickr('#cal-container', {
   inline: true,
   minDate: 'today',
-  locale: 'de',
+  // kein locale-Name noetig: die deutsche Beschriftung ist oben per
+  // flatpickr.localize() als Standard gesetzt
   disable: [
     date => CLOSED_DAYS.includes(date.getDay()) || isFull(date)
   ],
