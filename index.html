@@ -71,18 +71,25 @@
       position: fixed; inset: 0; z-index: 10000;
       display: none;
       place-items: center;
-      background: var(--bg-0);
+      /* gleicher Farbton wie die Startseite, damit beim Ausblenden
+         kein Farbsprung entsteht */
+      background: #ede8dd;
       transition: opacity .6s ease, visibility .6s ease;
     }
     .js #vorschau { display: grid; }
+    /* Groesse und weicher Rand exakt wie das Logo auf der Startseite —
+       so bleibt es beim Uebergang an Ort und Stelle stehen. */
     #vorschau img {
-      width: min(420px, 72vw); height: auto;
-      animation: vorschauAtmen 2.4s ease-in-out infinite;
+      width: clamp(300px,68vmin,820px); height: clamp(300px,68vmin,820px);
+      object-fit: contain;
+      -webkit-mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      animation: vorschauAtmen 2.6s ease-in-out infinite;
     }
     #vorschau.weg { opacity: 0; visibility: hidden; pointer-events: none; }
     @keyframes vorschauAtmen {
-      0%, 100% { transform: scale(.97); opacity: .8; }
-      50%      { transform: scale(1);   opacity: 1; }
+      0%, 100% { transform: scale(.985); opacity: .9; }
+      50%      { transform: scale(1);    opacity: 1; }
     }
     /* Solange die Vorschau liegt: nicht dahinter scrollen, und die
        Navigation ausblenden. Fest positionierte Elemente koennen sich
