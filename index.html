@@ -403,7 +403,8 @@
 
 <!-- Start-Vorschau mit dem Logo -->
 <div id="vorschau" aria-hidden="true">
-  <img src="logo-splash.png" alt="" width="560" height="560">
+  <img src="logosplash.png" alt="" width="560" height="560"
+       onerror="document.getElementById('vorschau').dataset.bildFehlt='1'">
 </div>
 <script>
 /* Start-Vorschau: liegt mindestens 3 Sekunden, verschwindet aber erst,
@@ -417,6 +418,14 @@
 
   var MINDESTENS = 3000;
   var NOTAUS     = 6000;
+
+  // Fehlt das Logo, hat die Vorschau keinen Zweck — dann sofort weg,
+  // statt drei Sekunden lang eine leere Flaeche zu zeigen.
+  var bild = v.querySelector('img');
+  if (bild) {
+    bild.addEventListener('error', function () { MINDESTENS = 0; weg(); });
+    if (bild.complete && bild.naturalWidth === 0) { MINDESTENS = 0; }
+  }
   var start = Date.now();
   var erledigt = false;
 
