@@ -77,16 +77,20 @@
       transition: opacity .6s ease, visibility .6s ease;
     }
     .js #vorschau { display: grid; }
-    /* Groesse und weicher Rand exakt wie das Logo auf der Startseite —
-       so bleibt es beim Uebergang an Ort und Stelle stehen. */
+    /* emblemsplash.png zeigt nur das Emblem — Kreis mit Blatt, ohne
+       Schriftzug —, liegt darauf aber an genau derselben Stelle wie im
+       vollen Logo. Zusammen mit gleicher Groesse und gleichem Rahmen wie
+       auf der Startseite bleibt das Blatt beim Uebergang exakt stehen,
+       waehrend der Schriftzug darum herum erscheint. */
     #vorschau img {
       width: clamp(300px,68vmin,820px); height: clamp(300px,68vmin,820px);
       object-fit: contain;
-      -webkit-mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
-      mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
       animation: vorschauAtmen 2.6s ease-in-out infinite;
     }
     #vorschau.weg { opacity: 0; visibility: hidden; pointer-events: none; }
+    /* Beim Ausblenden das Pulsieren anhalten und auf die exakte Groesse
+       zurueckgehen — so uebergibt das Emblem punktgenau an das Startbild. */
+    #vorschau.weg img { animation: none; transform: scale(1); transition: transform .5s ease; }
     @keyframes vorschauAtmen {
       0%, 100% { transform: scale(.985); opacity: .9; }
       50%      { transform: scale(1);    opacity: 1; }
@@ -410,7 +414,7 @@
 
 <!-- Start-Vorschau mit dem Logo -->
 <div id="vorschau" aria-hidden="true">
-  <img src="logosplash.png" alt="" width="560" height="560"
+  <img src="emblemsplash.png" alt="" width="560" height="560"
        onerror="document.getElementById('vorschau').dataset.bildFehlt='1'">
 </div>
 <script>
