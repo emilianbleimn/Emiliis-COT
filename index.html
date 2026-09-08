@@ -77,14 +77,16 @@
       transition: opacity .6s ease, visibility .6s ease;
     }
     .js #vorschau { display: grid; }
-    /* emblemsplash.png zeigt nur das Emblem — Kreis mit Blatt, ohne
-       Schriftzug —, liegt darauf aber an genau derselben Stelle wie im
-       vollen Logo. Zusammen mit gleicher Groesse und gleichem Rahmen wie
-       auf der Startseite bleibt das Blatt beim Uebergang exakt stehen,
-       waehrend der Schriftzug darum herum erscheint. */
+    /* Volles Logo, in Groesse und Lage genau wie auf der Startseite —
+       beim Ausblenden bleibt es daher an Ort und Stelle stehen. */
     #vorschau img {
       width: clamp(300px,68vmin,820px); height: clamp(300px,68vmin,820px);
       object-fit: contain;
+      /* Derselbe weiche Rand wie auf der Startseite. Der Bildhintergrund
+         ist einen Hauch heller als die Flaeche; ohne diesen Verlauf
+         zeichnete sich ein Rechteck um das Logo ab. */
+      -webkit-mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
       animation: vorschauAtmen 2.6s ease-in-out infinite;
     }
     /* Schlanke Ladeanzeige. Sie fuellt sich in drei Sekunden auf 92% und
@@ -454,7 +456,7 @@
 
 <!-- Start-Vorschau mit dem Logo -->
 <div id="vorschau" aria-hidden="true">
-  <img src="emblemsplash.png" alt="" width="560" height="560"
+  <img src="logosplash.png" alt="" width="560" height="560"
        onerror="document.getElementById('vorschau').dataset.bildFehlt='1'">
   <div class="v-balken" aria-hidden="true"><i></i></div>
   <div class="v-text" aria-hidden="true">wird geladen</div>
