@@ -91,19 +91,39 @@
        springt erst beim tatsaechlichen Ausblenden auf 100% — sie zeigt
        damit echten Fortschritt und nicht nur eine hübsche Animation. */
     .v-balken {
-      position: absolute; left: 50%; bottom: 16%;
+      position: absolute; left: 50%; bottom: 15%;
       transform: translateX(-50%);
-      width: min(160px, 38vw); height: 2px;
-      background: rgba(122,82,48,.16);
-      overflow: hidden;
+      width: min(220px, 52vw); height: 3px;
+      background: rgba(122,82,48,.14);
+      border-radius: 2px; overflow: hidden;
     }
     .v-balken i {
-      display: block; height: 100%; width: 0;
-      background: var(--bronze); opacity: .75;
+      display: block; position: relative; height: 100%; width: 0;
+      background: var(--bronze); opacity: .8; border-radius: 2px;
       animation: vLaden 3s linear forwards;
     }
+    /* Feiner Lichtschimmer wandert ueber den gefuellten Teil, damit die
+       Anzeige auch bei langsamem Fortschritt erkennbar lebendig bleibt. */
+    .v-balken i::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg,
+        transparent 0%, rgba(255,255,255,.55) 50%, transparent 100%);
+      animation: vSchimmer 1.6s ease-in-out infinite;
+    }
+    /* Beschriftung darunter — nimmt der Wartezeit das Unklare */
+    .v-text {
+      position: absolute; left: 50%; bottom: 15%;
+      transform: translate(-50%, 2.1rem);
+      font-size: .62rem; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--cream-faint); white-space: nowrap;
+    }
     #vorschau.weg .v-balken i { width: 100% !important; animation: none; transition: width .35s ease; }
-    @keyframes vLaden { to { width: 92%; } }
+    #vorschau.weg .v-balken i::after { animation: none; opacity: 0; }
+    @keyframes vLaden   { to { width: 92%; } }
+    @keyframes vSchimmer {
+      0%   { transform: translateX(-100%); }
+      60%, 100% { transform: translateX(100%); }
+    }
 
     #vorschau.weg { opacity: 0; visibility: hidden; pointer-events: none; }
     /* Beim Ausblenden das Pulsieren anhalten und auf die exakte Groesse
@@ -125,6 +145,7 @@
       #vorschau img { animation: none; }
       #vorschau { transition: none; }
       .v-balken i { animation-duration: 3s; }
+      .v-balken i::after { animation: none; opacity: 0; }
     }
     @media print { #vorschau { display: none !important; } }
 
@@ -436,6 +457,7 @@
   <img src="emblemsplash.png" alt="" width="560" height="560"
        onerror="document.getElementById('vorschau').dataset.bildFehlt='1'">
   <div class="v-balken" aria-hidden="true"><i></i></div>
+  <div class="v-text" aria-hidden="true">wird geladen</div>
 </div>
 <script>
 /* Start-Vorschau: liegt mindestens 3 Sekunden, verschwindet aber erst,
