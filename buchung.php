@@ -155,8 +155,59 @@ $header = [
     implode("\r\n", $header)
 );
 
-/* Die Anfrage ist gespeichert, auch wenn die Mail scheitern sollte —
-   sie steht in jedem Fall in admin.php.                              */
+/* ── Automatische Eingangsbestaetigung an die Kundin oder den Kunden ──
+   Bewusst als Eingangsbestaetigung formuliert, nicht als Zusage: der
+   Termin gilt erst, wenn Tonfluestern persoenlich geantwortet hat.
+   Sonst erschiene jede Anfrage als bereits bestaetigt.               */
+if (AUTO_ANTWORT) {
+    $vorname = trim(explode(' ', $name)[0]);
+
+    $k_betreff = 'Deine Anfrage im Tonflüstern ist angekommen';
+
+    $k_text = "Hallo $vorname,\n\n"
+        . "vielen Dank für deine Anfrage im Tonflüstern!\n\n"
+        . "Diese E-Mail bestätigt dir, dass deine Anfrage bei uns eingegangen ist.\n"
+        . "Wir melden uns innerhalb von " . ANTWORTFRIST . " persönlich bei dir und\n"
+        . "bestätigen dir den Termin.\n\n"
+        . str_repeat('-', 45) . "\n"
+        . "DEINE ANFRAGE\n\n"
+        . "Angebot:    $angebot\n"
+        . "Termin:     $datum_lang\n"
+        . "Zeit:       $oeffnung" . ($auf_anfr ? "  (Samstag und Sonntag nur auf Anfrage)" : "") . "\n"
+        . "Personen:   $personen\n"
+        . ($nachricht !== '' ? "\nDeine Nachricht:\n$nachricht\n" : '')
+        . str_repeat('-', 45) . "\n\n"
+        . "Gut zu wissen:\n"
+        . "Der Kurs läuft über die gesamte Öffnungszeit — du kommst einfach\n"
+        . "vorbei, wann es dir passt, und bleibst so lange du magst.\n"
+        . "Bezahlen kannst du bar oder per PayPal.\n\n"
+        . "Hat sich etwas geändert oder hast du eine Frage? Antworte einfach\n"
+        . "auf diese E-Mail oder ruf an.\n\n"
+        . ABSENDER . "\n\n"
+        . str_repeat('-', 45) . "\n"
+        . "Diese Nachricht wurde automatisch verschickt.\n";
+
+    $k_header = [
+        'From: Tonfluestern <' . EMPFAENGER . '>',
+        'Reply-To: ' . EMPFAENGER,
+        'Content-Type: text/plain; charset=UTF-8',
+        'X-Mailer: Tonfluestern',
+        'Auto-Submitted: auto-replied',          // damit Mailserver es als
+        'X-Auto-Response-Suppress: All',         // automatische Antwort erkennen
+    ];
+
+    // An die reine Adresse senden; der Name kommt bewusst nicht in den
+    // Kopfbereich, damit dort nichts eingeschleust werden kann.
+    @mail(
+        $email,
+        '=?UTF-8?B?' . base64_encode($k_betreff) . '?=',
+        $k_text,
+        implode("\r\n", $k_header)
+    );
+}
+
+/* Die Anfrage ist gespeichert, auch wenn eine der Mails scheitern
+   sollte — sie steht in jedem Fall in admin.php.                     */
 
 antwort([
     'ok'    => true,

@@ -48,6 +48,13 @@ const KALENDER_KEY = 'omlry06src94to43dz477kss4cb5';
    "Text kopieren" funktioniert unabhaengig davon immer.            */
 const WEBMAIL_COMPOSE = 'https://webmail.your-server.de/imp/dynamic.php?page=compose&to={to}&subject={subject}&body={body}';
 
+/* Automatische Eingangsbestaetigung an die Kundin oder den Kunden.
+   Auf false setzen, wenn keine automatische Antwort verschickt werden soll. */
+const AUTO_ANTWORT = true;
+
+/* Innerhalb welcher Frist wird geantwortet? Steht so in der Mail. */
+const ANTWORTFRIST = '24 Stunden';
+
 /* Absenderangaben fuer die Textvorlagen */
 const ABSENDER = "Herzliche Grüße\nTatjana Bleim Muntanion\nTonflüstern – Keramikcafé\nHauptstraße 43, 64711 Erbach\nTelefon: +49 152 29221996";
 

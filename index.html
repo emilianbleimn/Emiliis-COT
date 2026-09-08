@@ -87,6 +87,24 @@
       object-fit: contain;
       animation: vorschauAtmen 2.6s ease-in-out infinite;
     }
+    /* Schlanke Ladeanzeige. Sie fuellt sich in drei Sekunden auf 92% und
+       springt erst beim tatsaechlichen Ausblenden auf 100% — sie zeigt
+       damit echten Fortschritt und nicht nur eine hübsche Animation. */
+    .v-balken {
+      position: absolute; left: 50%; bottom: 16%;
+      transform: translateX(-50%);
+      width: min(160px, 38vw); height: 2px;
+      background: rgba(122,82,48,.16);
+      overflow: hidden;
+    }
+    .v-balken i {
+      display: block; height: 100%; width: 0;
+      background: var(--bronze); opacity: .75;
+      animation: vLaden 3s linear forwards;
+    }
+    #vorschau.weg .v-balken i { width: 100% !important; animation: none; transition: width .35s ease; }
+    @keyframes vLaden { to { width: 92%; } }
+
     #vorschau.weg { opacity: 0; visibility: hidden; pointer-events: none; }
     /* Beim Ausblenden das Pulsieren anhalten und auf die exakte Groesse
        zurueckgehen — so uebergibt das Emblem punktgenau an das Startbild. */
@@ -106,6 +124,7 @@
     @media (prefers-reduced-motion: reduce) {
       #vorschau img { animation: none; }
       #vorschau { transition: none; }
+      .v-balken i { animation-duration: 3s; }
     }
     @media print { #vorschau { display: none !important; } }
 
@@ -416,6 +435,7 @@
 <div id="vorschau" aria-hidden="true">
   <img src="emblemsplash.png" alt="" width="560" height="560"
        onerror="document.getElementById('vorschau').dataset.bildFehlt='1'">
+  <div class="v-balken" aria-hidden="true"><i></i></div>
 </div>
 <script>
 /* Start-Vorschau: liegt mindestens 3 Sekunden, verschwindet aber erst,
