@@ -164,31 +164,41 @@ $header = [
    Samstag und Sonntag laufen ausdruecklich auf Anfrage: es gibt keine
    feste Anfangszeit und der Betrieb muss erst zustimmen. Eine
    automatische Zusage waere hier eine Aussage, die niemand geprueft
-   hat, deshalb geht dort nur eine Eingangsbestaetigung raus.        */
+   hat, deshalb geht dort nur eine Eingangsbestaetigung raus.
+
+   Angeschrieben wird immer die eine Person, die gebucht hat — also in
+   der Einzahl. Mehrzahl nur dort, wo wirklich die ganze angemeldete
+   Gruppe gemeint ist (puenktlich kommen, Vorfreude).             */
 if (AUTO_ANTWORT) {
     $vorname    = trim(explode(' ', $name)[0]);
     $datum_kurz = date('d.m.Y', strtotime($datum));
+
+    $mehr    = $personen > 1;
+    $moechte = $mehr ? 'ihr zu Tonflüstern kommen möchtet' : 'du zu Tonflüstern kommen möchtest';
+    $euch    = $mehr ? 'euch' : 'dir';
+    $kommt   = $mehr ? 'kommt' : 'komm';
+    $aufEuch = $mehr ? 'euch' : 'dich';
 
     $gruss = GRUSS . "\n";
 
     if ($auf_anfr) {
         /* ── Samstag / Sonntag: Anfrage eingegangen ── */
-        $k_betreff = 'Eure Anfrage bei Tonflüstern ist angekommen';
+        $k_betreff = 'Deine Anfrage bei Tonflüstern ist angekommen';
 
         $k_text =
 "Hallo $vorname,
 
-wie schön, dass ihr zu Tonflüstern kommen möchtet! Eure Anfrage ist bei mir angekommen.
+wie schön, dass $moechte! Deine Anfrage ist bei mir angekommen.
 
 Angebot: $angebot
 Datum: $datum_kurz
 Personen: $personen
 
-Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei euch — dann auch mit einer festen Uhrzeit.
+Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei dir — dann auch mit einer festen Uhrzeit.
 
-Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder ihr Fragen habt, meldet euch gerne bei mir.
+Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder du Fragen hast, melde dich gerne bei mir.
 
-Ich freue mich auf euch!
+Ich freue mich auf $aufEuch!
 
 " . $gruss;
 
@@ -199,23 +209,23 @@ Ich freue mich auf euch!
             $beginn = $mm[1] . ' Uhr';
         }
 
-        $k_betreff = 'Eure Terminbestätigung – Tonflüstern';
+        $k_betreff = 'Deine Terminbestätigung – Tonflüstern';
 
         $k_text =
 "Hallo $vorname,
 
-wie schön, dass ihr zu Tonflüstern kommen möchtet! Hiermit bestätige ich euch gerne den folgenden Termin:
+wie schön, dass $moechte! Hiermit bestätige ich dir gerne den folgenden Termin:
 
 Angebot: $angebot
 Datum: $datum_kurz
 Beginn: $beginn
 Personen: $personen
 
-Bitte kommt zur angegebenen Anfangszeit, damit euch genügend Zeit zum kreativen Gestalten bleibt.
+Bitte $kommt zur angegebenen Anfangszeit, damit $euch genügend Zeit zum kreativen Gestalten bleibt.
 
-Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder ihr Fragen habt, meldet euch gerne bei mir.
+Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder du Fragen hast, melde dich gerne bei mir.
 
-Ich freue mich auf eine schöne kreative Zeit mit euch!
+Ich freue mich auf eine schöne kreative Zeit mit $euch!
 
 " . $gruss;
     }
