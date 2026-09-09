@@ -166,39 +166,52 @@ $header = [
    automatische Zusage waere hier eine Aussage, die niemand geprueft
    hat, deshalb geht dort nur eine Eingangsbestaetigung raus.
 
-   Angeschrieben wird immer die eine Person, die gebucht hat — also in
-   der Einzahl. Mehrzahl nur dort, wo wirklich die ganze angemeldete
-   Gruppe gemeint ist (puenktlich kommen, Vorfreude).             */
+   Dazu die Anrede: bei mehreren angemeldeten Personen das vertraute
+   "ihr", bei einer einzelnen Person die foermliche Anrede "Sie".   */
 if (AUTO_ANTWORT) {
     $vorname    = trim(explode(' ', $name)[0]);
     $datum_kurz = date('d.m.Y', strtotime($datum));
 
-    $mehr    = $personen > 1;
-    $moechte = $mehr ? 'ihr zu Tonflüstern kommen möchtet' : 'du zu Tonflüstern kommen möchtest';
-    $euch    = $mehr ? 'euch' : 'dir';
-    $kommt   = $mehr ? 'kommt' : 'komm';
-    $aufEuch = $mehr ? 'euch' : 'dich';
+    $w = ($personen > 1)
+        ? [
+            'moechte'  => 'ihr zu Tonflüstern kommen möchtet',
+            'dativ'    => 'euch',
+            'kommt'    => 'kommt',
+            'fragen'   => 'ihr Fragen habt, meldet euch',
+            'aufWen'   => 'euch',
+            'anfrage'  => 'Eure Anfrage',
+            'possessiv'=> 'Eure',
+          ]
+        : [
+            'moechte'  => 'Sie zu Tonflüstern kommen möchten',
+            'dativ'    => 'Ihnen',
+            'kommt'    => 'kommen Sie',
+            'fragen'   => 'Sie Fragen haben, melden Sie sich',
+            'aufWen'   => 'Sie',
+            'anfrage'  => 'Ihre Anfrage',
+            'possessiv'=> 'Ihre',
+          ];
 
     $gruss = GRUSS . "\n";
 
     if ($auf_anfr) {
         /* ── Samstag / Sonntag: Anfrage eingegangen ── */
-        $k_betreff = 'Deine Anfrage bei Tonflüstern ist angekommen';
+        $k_betreff = $w['possessiv'] . ' Anfrage bei Tonflüstern ist angekommen';
 
         $k_text =
 "Hallo $vorname,
 
-wie schön, dass $moechte! Deine Anfrage ist bei mir angekommen.
+wie schön, dass {$w['moechte']}! {$w['anfrage']} ist bei mir angekommen.
 
 Angebot: $angebot
 Datum: $datum_kurz
 Personen: $personen
 
-Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei dir — dann auch mit einer festen Uhrzeit.
+Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit.
 
-Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder du Fragen hast, melde dich gerne bei mir.
+Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
 
-Ich freue mich auf $aufEuch!
+Ich freue mich auf {$w['aufWen']}!
 
 " . $gruss;
 
@@ -209,23 +222,23 @@ Ich freue mich auf $aufEuch!
             $beginn = $mm[1] . ' Uhr';
         }
 
-        $k_betreff = 'Deine Terminbestätigung – Tonflüstern';
+        $k_betreff = $w['possessiv'] . ' Terminbestätigung – Tonflüstern';
 
         $k_text =
 "Hallo $vorname,
 
-wie schön, dass $moechte! Hiermit bestätige ich dir gerne den folgenden Termin:
+wie schön, dass {$w['moechte']}! Hiermit bestätige ich {$w['dativ']} gerne den folgenden Termin:
 
 Angebot: $angebot
 Datum: $datum_kurz
 Beginn: $beginn
 Personen: $personen
 
-Bitte $kommt zur angegebenen Anfangszeit, damit $euch genügend Zeit zum kreativen Gestalten bleibt.
+Bitte {$w['kommt']} zur angegebenen Anfangszeit, damit {$w['dativ']} genügend Zeit zum kreativen Gestalten bleibt.
 
-Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder du Fragen hast, melde dich gerne bei mir.
+Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
 
-Ich freue mich auf eine schöne kreative Zeit mit $euch!
+Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
 " . $gruss;
     }

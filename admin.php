@@ -174,18 +174,33 @@ function vorlage(array $a, string $art): array {
     // Samstag und Sonntag laufen auf Anfrage — dort gibt es keine feste Zeit
     $wochenende = !isset(OPEN_HOURS[$wt]);
 
-    /* Angeschrieben wird die eine Person, die gebucht hat — also Einzahl.
-       Mehrzahl nur dort, wo wirklich die ganze angemeldete Gruppe
-       gemeint ist: puenktlich kommen, Zeit zum Gestalten, Vorfreude. */
-    $mehr    = $pers > 1;
-    $moechte = $mehr ? 'ihr zu Tonflüstern kommen möchtet' : 'du zu Tonflüstern kommen möchtest';
-    $euch    = $mehr ? 'euch' : 'dir';
-    $kommt   = $mehr ? 'kommt' : 'komm';
-    $aufEuch = $mehr ? 'euch' : 'dich';
-    $seid    = $mehr ? 'seid ihr' : 'bist du';
-    $schreib = $mehr ? 'Schreibt' : 'Schreib';
-    $fragt   = $mehr ? 'fragt'    : 'frag';
-    $passt   = $mehr ? 'euch'     : 'dir';
+    /* Anrede: bei mehreren angemeldeten Personen das vertraute "ihr",
+       bei einer einzelnen Person die foermliche Anrede "Sie". */
+    $w = ($pers > 1)
+        ? [
+            'moechte'  => 'ihr zu Tonflüstern kommen möchtet',
+            'dativ'    => 'euch',
+            'akkusativ'=> 'euch',
+            'kommt'    => 'kommt',
+            'fragen'   => 'ihr Fragen habt, meldet euch',
+            'possessiv'=> 'Eure',
+            'deine'    => 'eure',
+            'seid'     => 'seid ihr',
+            'schreib'  => 'Schreibt',
+            'frag'     => 'fragt',
+          ]
+        : [
+            'moechte'  => 'Sie zu Tonflüstern kommen möchten',
+            'dativ'    => 'Ihnen',
+            'akkusativ'=> 'Sie',
+            'kommt'    => 'kommen Sie',
+            'fragen'   => 'Sie Fragen haben, melden Sie sich',
+            'possessiv'=> 'Ihre',
+            'deine'    => 'Ihre',
+            'seid'     => 'sind Sie',
+            'schreib'  => 'Schreiben Sie',
+            'frag'     => 'fragen Sie',
+          ];
 
     // Anfangszeit aus der Oeffnungszeit loesen: "15:00 – 18:00 Uhr" -> "15:00 Uhr"
     $beginn = '[Uhrzeit eintragen]';
@@ -205,11 +220,11 @@ function vorlage(array $a, string $art): array {
 
         if ($wochenende) {
             return [
-                'betreff' => 'Deine Anfrage für den ' . $kurz . ' – Tonflüstern',
+                'betreff' => $w['possessiv'] . ' Anfrage für den ' . $kurz . ' – Tonflüstern',
                 'text' =>
 "Hallo $vname,
 
-vielen Dank für deine Anfrage für den $tag!
+vielen Dank für {$w['deine']} Anfrage für den $tag!
 
 Leider kann ich diesen Termin nicht einrichten. Samstage und Sonntage
 kann ich nur anbieten, wenn es zeitlich passt — dieses Mal klappt es
@@ -217,11 +232,11 @@ leider nicht.
 
 [Wenn du magst, hier kurz den Grund ergänzen.]
 
-Unter der Woche $seid jederzeit herzlich willkommen:
+Unter der Woche {$w['seid']} jederzeit herzlich willkommen:
 
 $zeitenliste
 
-$schreib mir einfach, welcher Tag $passt passt — oder $fragt gerne noch
+{$w['schreib']} mir einfach, welcher Tag {$w['dativ']} passt — oder {$w['frag']} gerne noch
 einmal für ein anderes Wochenende an.
 
 Es tut mir leid, dass es dieses Mal nicht klappt. Ich hoffe, wir sehen
@@ -232,13 +247,13 @@ uns bald!
         }
 
         return [
-            'betreff' => 'Deine Anfrage für den ' . $kurz . ' – Tonflüstern',
+            'betreff' => $w['possessiv'] . ' Anfrage für den ' . $kurz . ' – Tonflüstern',
             'text' =>
 "Hallo $vname,
 
-vielen Dank für deine Anfrage für den $tag!
+vielen Dank für {$w['deine']} Anfrage für den $tag!
 
-Leider kann ich dir diesen Termin nicht anbieten.
+Leider kann ich {$w['dativ']} diesen Termin nicht anbieten.
 
 [Hier kurz den Grund ergänzen – zum Beispiel: der Tag ist inzwischen
 ausgebucht.]
@@ -247,7 +262,7 @@ Sehr gerne finden wir einen anderen Termin:
 
 $zeitenliste
 
-$schreib mir einfach, welcher Tag $passt passt.
+{$w['schreib']} mir einfach, welcher Tag {$w['dativ']} passt.
 
 Es tut mir leid, dass es dieses Mal nicht klappt. Ich hoffe, wir sehen
 uns bald!
@@ -258,15 +273,15 @@ uns bald!
 
     /* ── Zusage ── */
     $hinweis = $wochenende
-        ? "Da Samstage und Sonntage bei uns auf Anfrage laufen, trage ich\n$euch die oben genannte Uhrzeit ein."
-        : "Bitte $kommt zur angegebenen Anfangszeit, damit $euch genügend Zeit\nzum kreativen Gestalten bleibt.";
+        ? "Da Samstage und Sonntage bei uns auf Anfrage laufen, trage ich\n{$w['dativ']} die oben genannte Uhrzeit ein."
+        : "Bitte {$w['kommt']} zur angegebenen Anfangszeit, damit {$w['dativ']} genügend Zeit\nzum kreativen Gestalten bleibt.";
 
     return [
-        'betreff' => 'Deine Terminbestätigung – Tonflüstern',
+        'betreff' => $w['possessiv'] . ' Terminbestätigung – Tonflüstern',
         'text' =>
 "Hallo $vname,
 
-wie schön, dass $moechte! Hiermit bestätige ich dir gerne den folgenden Termin:
+wie schön, dass {$w['moechte']}! Hiermit bestätige ich {$w['dativ']} gerne den folgenden Termin:
 
 Angebot: $ang
 Datum: $kurz
@@ -275,9 +290,9 @@ Personen: $pers
 
 $hinweis
 
-Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder du Fragen hast, melde dich gerne bei mir.
+Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
 
-Ich freue mich auf eine schöne kreative Zeit mit $euch!
+Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
 " . GRUSS,
     ];
