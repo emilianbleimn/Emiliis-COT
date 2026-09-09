@@ -156,23 +156,52 @@ $header = [
 );
 
 /* ── Automatische Antwort an die Kundin oder den Kunden ──
-   Text wie vom Betrieb vorgegeben. Der Beginn wird aus den
-   Oeffnungszeiten gezogen; an Samstagen und Sonntagen gibt es keine
-   feste Anfangszeit, dort steht "nach Absprache".                   */
+   Zwei Faelle, weil sie sich inhaltlich unterscheiden:
+
+   Mittwoch bis Freitag laufen zu festen Zeiten und die freien Plaetze
+   sind geprueft — hier wird der Termin direkt zugesagt.
+
+   Samstag und Sonntag laufen ausdruecklich auf Anfrage: es gibt keine
+   feste Anfangszeit und der Betrieb muss erst zustimmen. Eine
+   automatische Zusage waere hier eine Aussage, die niemand geprueft
+   hat, deshalb geht dort nur eine Eingangsbestaetigung raus.        */
 if (AUTO_ANTWORT) {
-    $vorname = trim(explode(' ', $name)[0]);
-
-    // Anfangszeit aus der Oeffnungszeit herausloesen: "15:00 – 18:00 Uhr" -> "15:00 Uhr"
-    $beginn = 'nach Absprache';
-    if (!$auf_anfr && preg_match('/(\d{1,2}:\d{2})/', $oeffnung, $mm)) {
-        $beginn = $mm[1] . ' Uhr';
-    }
-
+    $vorname    = trim(explode(' ', $name)[0]);
     $datum_kurz = date('d.m.Y', strtotime($datum));
 
-    $k_betreff = 'Deine Terminbestätigung – Tonflüstern';
+    $gruss = "Liebe Grüße\nTatjana\nTonflüstern\nwww.tonfluestern.de\n";
 
-    $k_text =
+    if ($auf_anfr) {
+        /* ── Samstag / Sonntag: Anfrage eingegangen ── */
+        $k_betreff = 'Eure Anfrage bei Tonflüstern ist angekommen';
+
+        $k_text =
+"Hallo $vorname,
+
+wie schön, dass ihr zu Tonflüstern kommen möchtet! Eure Anfrage ist bei mir angekommen.
+
+Angebot: $angebot
+Datum: $datum_kurz
+Personen: $personen
+
+Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei euch — dann auch mit einer festen Uhrzeit.
+
+Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder ihr Fragen habt, meldet euch gerne bei mir.
+
+Ich freue mich auf euch!
+
+" . $gruss;
+
+    } else {
+        /* ── Mittwoch bis Freitag: Termin zugesagt ── */
+        $beginn = 'nach Absprache';
+        if (preg_match('/(\d{1,2}:\d{2})/', $oeffnung, $mm)) {
+            $beginn = $mm[1] . ' Uhr';
+        }
+
+        $k_betreff = 'Eure Terminbestätigung – Tonflüstern';
+
+        $k_text =
 "Hallo $vorname,
 
 wie schön, dass ihr zu Tonflüstern kommen möchtet! Hiermit bestätige ich euch gerne den folgenden Termin:
@@ -188,11 +217,8 @@ Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ä
 
 Ich freue mich auf eine schöne kreative Zeit mit euch!
 
-Liebe Grüße
-Tatjana
-Tonflüstern
-www.tonfluestern.de
-";
+" . $gruss;
+    }
 
     $k_header = [
         'From: Tonfluestern <' . EMPFAENGER . '>',
