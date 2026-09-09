@@ -169,7 +169,7 @@ if (AUTO_ANTWORT) {
     $vorname    = trim(explode(' ', $name)[0]);
     $datum_kurz = date('d.m.Y', strtotime($datum));
 
-    $gruss = "Liebe Grüße\nTatjana\nTonflüstern\nwww.tonfluestern.de\n";
+    $gruss = GRUSS . "\n";
 
     if ($auf_anfr) {
         /* ── Samstag / Sonntag: Anfrage eingegangen ── */

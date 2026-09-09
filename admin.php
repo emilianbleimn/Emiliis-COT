@@ -164,54 +164,109 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 function vorlage(array $a, string $art): array {
     $wt_lang = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
     $ts    = strtotime((string)($a['datum'] ?? 'now'));
-    $tag   = $wt_lang[(int)date('w', $ts)] . ', ' . date('d.m.Y', $ts);
+    $wt    = (int)date('w', $ts);
+    $tag   = $wt_lang[$wt] . ', ' . date('d.m.Y', $ts);
+    $kurz  = date('d.m.Y', $ts);
     $vname = trim(explode(' ', trim((string)($a['name'] ?? '')))[0]);
     $pers  = (int)($a['personen'] ?? 0);
     $ang   = (string)($a['angebot'] ?? 'Keramik bemalen');
-    $zeit  = (string)($a['zeit'] ?? 'Auf Anfrage');
 
+    // Samstag und Sonntag laufen auf Anfrage — dort gibt es keine feste Zeit
+    $wochenende = !isset(OPEN_HOURS[$wt]);
+
+    // Anfangszeit aus der Oeffnungszeit loesen: "15:00 – 18:00 Uhr" -> "15:00 Uhr"
+    $beginn = '[Uhrzeit eintragen]';
+    if (!$wochenende && preg_match('/(\d{1,2}:\d{2})/', OPEN_HOURS[$wt], $mm)) {
+        $beginn = $mm[1] . ' Uhr';
+    }
+
+    // Oeffnungszeiten als Aufzaehlung, damit sie in den Absagen aktuell bleiben
+    $zeiten = [];
+    foreach (OPEN_HOURS as $t => $z) {
+        $zeiten[] = $wt_lang[$t] . ' von ' . str_replace(' Uhr', ' Uhr', $z);
+    }
+    $zeitenliste = implode("\n", array_map(fn($z) => '   ' . $z, $zeiten));
+
+    /* ── Absage ── */
     if ($art === 'storniert') {
+
+        if ($wochenende) {
+            return [
+                'betreff' => 'Eure Anfrage für den ' . $kurz . ' – Tonflüstern',
+                'text' =>
+"Hallo $vname,
+
+vielen Dank für eure Anfrage für den $tag!
+
+Leider kann ich diesen Termin nicht einrichten. Samstage und Sonntage
+kann ich nur anbieten, wenn es zeitlich passt — dieses Mal klappt es
+leider nicht.
+
+[Wenn du magst, hier kurz den Grund ergänzen.]
+
+Unter der Woche seid ihr jederzeit herzlich willkommen:
+
+$zeitenliste
+
+Schreibt mir einfach, welcher Tag euch passt — oder fragt gerne noch
+einmal für ein anderes Wochenende an.
+
+Es tut mir leid, dass es dieses Mal nicht klappt. Ich hoffe, wir sehen
+uns bald!
+
+" . GRUSS,
+            ];
+        }
+
         return [
-            'betreff' => 'Deine Anfrage im Tonflüstern – ' . $tag,
+            'betreff' => 'Eure Anfrage für den ' . $kurz . ' – Tonflüstern',
             'text' =>
 "Hallo $vname,
 
-vielen Dank für deine Anfrage im Tonflüstern.
+vielen Dank für eure Anfrage für den $tag!
 
-Leider kann ich dir den Termin am $tag nicht anbieten.
+Leider kann ich euch diesen Termin nicht anbieten.
 
 [Hier kurz den Grund ergänzen – zum Beispiel: der Tag ist inzwischen
-ausgebucht, oder wir haben an dem Tag geschlossen.]
+ausgebucht.]
 
-Sehr gerne finden wir einen anderen Termin. Melde dich einfach bei mir,
-dann schauen wir gemeinsam, was passt.
+Sehr gerne finden wir einen anderen Termin:
 
-" . ABSENDER,
+$zeitenliste
+
+Schreibt mir einfach, welcher Tag euch passt.
+
+Es tut mir leid, dass es dieses Mal nicht klappt. Ich hoffe, wir sehen
+uns bald!
+
+" . GRUSS,
         ];
     }
 
+    /* ── Zusage ── */
+    $hinweis = $wochenende
+        ? "Da Samstage und Sonntage bei uns auf Anfrage laufen, trage ich\neuch die oben genannte Uhrzeit ein."
+        : "Bitte kommt zur angegebenen Anfangszeit, damit euch genügend Zeit\nzum kreativen Gestalten bleibt.";
+
     return [
-        'betreff' => 'Dein Termin im Tonflüstern am ' . $tag . ' ist bestätigt',
+        'betreff' => 'Eure Terminbestätigung – Tonflüstern',
         'text' =>
 "Hallo $vname,
 
-vielen Dank für deine Anfrage – dein Termin steht!
+wie schön, dass ihr zu Tonflüstern kommen möchtet! Hiermit bestätige ich euch gerne den folgenden Termin:
 
-   Angebot:   $ang
-   Termin:    $tag
-   Uhrzeit:   $zeit
-   Personen:  $pers
+Angebot: $ang
+Datum: $kurz
+Beginn: $beginn
+Personen: $pers
 
-Der Kurs läuft über die gesamte Öffnungszeit. Du kannst also kommen,
-wann es dir passt, und so lange bleiben, wie du magst.
+$hinweis
 
-Bezahlen kannst du bei uns bar oder per PayPal.
+Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder ihr Fragen habt, meldet euch gerne bei mir.
 
-Falls sich etwas ändert oder du Fragen hast, melde dich einfach.
+Ich freue mich auf eine schöne kreative Zeit mit euch!
 
-Ich freue mich auf dich!
-
-" . ABSENDER,
+" . GRUSS,
     ];
 }
 ?>

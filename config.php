@@ -55,7 +55,11 @@ const AUTO_ANTWORT = true;
 /* Innerhalb welcher Frist wird geantwortet? Steht so in der Mail. */
 const ANTWORTFRIST = '24 Stunden';
 
-/* Absenderangaben fuer die Textvorlagen */
+/* Gruss am Ende aller Nachrichten an Kundinnen und Kunden —
+   in den automatischen Mails wie in den Vorlagen der Uebersicht. */
+const GRUSS = "Liebe Grüße\nTatjana\nTonflüstern\nwww.tonfluestern.de";
+
+/* Ausfuehrliche Absenderangaben, falls sie irgendwo gebraucht werden */
 const ABSENDER = "Herzliche Grüße\nTatjana Bleim Muntanion\nTonflüstern – Keramikcafé\nHauptstraße 43, 64711 Erbach\nTelefon: +49 152 29221996";
 
 
