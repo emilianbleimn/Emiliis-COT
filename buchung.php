@@ -155,37 +155,44 @@ $header = [
     implode("\r\n", $header)
 );
 
-/* ── Automatische Eingangsbestaetigung an die Kundin oder den Kunden ──
-   Bewusst als Eingangsbestaetigung formuliert, nicht als Zusage: der
-   Termin gilt erst, wenn Tonfluestern persoenlich geantwortet hat.
-   Sonst erschiene jede Anfrage als bereits bestaetigt.               */
+/* ── Automatische Antwort an die Kundin oder den Kunden ──
+   Text wie vom Betrieb vorgegeben. Der Beginn wird aus den
+   Oeffnungszeiten gezogen; an Samstagen und Sonntagen gibt es keine
+   feste Anfangszeit, dort steht "nach Absprache".                   */
 if (AUTO_ANTWORT) {
     $vorname = trim(explode(' ', $name)[0]);
 
-    $k_betreff = 'Deine Anfrage im Tonflüstern ist angekommen';
+    // Anfangszeit aus der Oeffnungszeit herausloesen: "15:00 – 18:00 Uhr" -> "15:00 Uhr"
+    $beginn = 'nach Absprache';
+    if (!$auf_anfr && preg_match('/(\d{1,2}:\d{2})/', $oeffnung, $mm)) {
+        $beginn = $mm[1] . ' Uhr';
+    }
 
-    $k_text = "Hallo $vorname,\n\n"
-        . "vielen Dank für deine Anfrage im Tonflüstern!\n\n"
-        . "Diese E-Mail bestätigt dir, dass deine Anfrage bei uns eingegangen ist.\n"
-        . "Wir melden uns innerhalb von " . ANTWORTFRIST . " persönlich bei dir und\n"
-        . "bestätigen dir den Termin.\n\n"
-        . str_repeat('-', 45) . "\n"
-        . "DEINE ANFRAGE\n\n"
-        . "Angebot:    $angebot\n"
-        . "Termin:     $datum_lang\n"
-        . "Zeit:       $oeffnung" . ($auf_anfr ? "  (Samstag und Sonntag nur auf Anfrage)" : "") . "\n"
-        . "Personen:   $personen\n"
-        . ($nachricht !== '' ? "\nDeine Nachricht:\n$nachricht\n" : '')
-        . str_repeat('-', 45) . "\n\n"
-        . "Gut zu wissen:\n"
-        . "Der Kurs läuft über die gesamte Öffnungszeit — du kommst einfach\n"
-        . "vorbei, wann es dir passt, und bleibst so lange du magst.\n"
-        . "Bezahlen kannst du bar oder per PayPal.\n\n"
-        . "Hat sich etwas geändert oder hast du eine Frage? Antworte einfach\n"
-        . "auf diese E-Mail oder ruf an.\n\n"
-        . ABSENDER . "\n\n"
-        . str_repeat('-', 45) . "\n"
-        . "Diese Nachricht wurde automatisch verschickt.\n";
+    $datum_kurz = date('d.m.Y', strtotime($datum));
+
+    $k_betreff = 'Deine Terminbestätigung – Tonflüstern';
+
+    $k_text =
+"Hallo $vorname,
+
+wie schön, dass ihr zu Tonflüstern kommen möchtet! Hiermit bestätige ich euch gerne den folgenden Termin:
+
+Angebot: $angebot
+Datum: $datum_kurz
+Beginn: $beginn
+Personen: $personen
+
+Bitte kommt zur angegebenen Anfangszeit, damit euch genügend Zeit zum kreativen Gestalten bleibt.
+
+Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder ihr Fragen habt, meldet euch gerne bei mir.
+
+Ich freue mich auf eine schöne kreative Zeit mit euch!
+
+Liebe Grüße
+Tatjana
+Tonflüstern
+www.tonfluestern.de
+";
 
     $k_header = [
         'From: Tonfluestern <' . EMPFAENGER . '>',
