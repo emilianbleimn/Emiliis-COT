@@ -66,10 +66,14 @@ $wt        = (int)date('w', strtotime($datum));
 $oeffnung  = OPEN_HOURS[$wt] ?? 'Auf Anfrage';
 $auf_anfr  = !isset(OPEN_HOURS[$wt]);
 
+/* Kennung schon hier erzeugen: nach dem Mailversand wird der Datensatz
+   damit wiedergefunden, um festzuhalten ob die Mails rausgingen. */
+$anfrage_id = bin2hex(random_bytes(8));
+
 /* ── Speichern unter Sperre, damit die Plätze nicht doppelt vergeben werden ── */
 try {
 $ergebnis = mit_sperre(function (array &$d) use (
-    $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot
+    $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot, $anfrage_id
 ) {
     $noch_frei = frei($d, $datum);
 
@@ -84,7 +88,7 @@ $ergebnis = mit_sperre(function (array &$d) use (
     }
 
     $d['anfragen'][] = [
-        'id'        => bin2hex(random_bytes(8)),
+        'id'        => $anfrage_id,
         'datum'     => $datum,
         'angebot'   => $angebot,
         'personen'  => $personen,
@@ -148,7 +152,7 @@ $header = [
     'X-Mailer: Tonfluestern',
 ];
 
-@mail(
+$mail_betreiber = @mail(
     EMPFAENGER,
     '=?UTF-8?B?' . base64_encode($betreff) . '?=',
     $text,
@@ -168,6 +172,7 @@ $header = [
 
    Dazu die Anrede: bei mehreren angemeldeten Personen das vertraute
    "ihr", bei einer einzelnen Person die foermliche Anrede "Sie".   */
+$mail_kunde = null;                 // null = automatische Antwort ist abgeschaltet
 if (AUTO_ANTWORT) {
     $vorname    = trim(explode(' ', $name)[0]);
     $datum_kurz = date('d.m.Y', strtotime($datum));
@@ -254,12 +259,33 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
     // An die reine Adresse senden; der Name kommt bewusst nicht in den
     // Kopfbereich, damit dort nichts eingeschleust werden kann.
-    @mail(
+    $mail_kunde = @mail(
         $email,
         '=?UTF-8?B?' . base64_encode($k_betreff) . '?=',
         $k_text,
         implode("\r\n", $k_header)
     );
+}
+
+/* ── Ergebnis des Versands im Datensatz festhalten ──
+   Damit laesst sich in der Uebersicht nachsehen, ob die automatische
+   Antwort rausging. Wichtig zu wissen: ein Ja bedeutet, dass der
+   Server die Mail zur Zustellung angenommen hat — nicht, dass sie im
+   Postfach angekommen ist. Ob sie im Spam landet oder vom Empfaenger
+   abgelehnt wird, laesst sich von hier aus nicht feststellen.       */
+try {
+    mit_sperre(function (array &$d) use ($anfrage_id, $mail_betreiber, $mail_kunde) {
+        foreach ($d['anfragen'] as &$a) {
+            if (($a['id'] ?? '') === $anfrage_id) {
+                $a['mail_betreiber'] = (bool)$mail_betreiber;
+                $a['mail_kunde']     = $mail_kunde;   // true, false oder null wenn abgeschaltet
+                $a['mail_zeit']      = date('Y-m-d H:i:s');
+            }
+        }
+    });
+} catch (Throwable $ex) {
+    // Nur die Notiz ist misslungen; die Anfrage selbst steht bereits sicher
+    error_log('Tonfluestern Versandnotiz: ' . $ex->getMessage());
 }
 
 /* Die Anfrage ist gespeichert, auch wenn eine der Mails scheitern

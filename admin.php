@@ -332,6 +332,10 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .msg{color:#5e4535;font-size:.82rem;max-width:320px;white-space:pre-wrap;word-break:break-word}
   .ang{display:inline-block;font-size:.75rem;padding:.15rem .5rem;background:rgba(122,82,48,.1);
        border:1px solid rgba(122,82,48,.2);white-space:nowrap}
+  .mailstatus{display:block;font-size:.7rem;margin-top:.25rem;line-height:1.4}
+  .ms-ok  {color:#4a6b3a}
+  .ms-fehl{color:#a84c2a;font-weight:600}
+  .ms-aus {color:#a8917a}
   button{font-family:inherit;font-size:.72rem;padding:.3rem .7rem;border:1px solid rgba(122,82,48,.35);
          background:#f4ece0;color:#5e4535;cursor:pointer;white-space:nowrap}
   button:hover{background:#d4c5af}
@@ -425,6 +429,25 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
               <span style="font-size:.72rem;color:#a8917a">
                 <?= $e(date('d.m. H:i', strtotime($a['erstellt'] ?? 'now'))) ?>
               </span>
+              <?php
+                /* Wurde die automatische Antwort verschickt?
+                   Fehlt der Eintrag ganz, stammt die Anfrage aus der Zeit
+                   vor dieser Aufzeichnung — dann wird nichts angezeigt. */
+                if (array_key_exists('mail_kunde', $a)):
+                    $mk = $a['mail_kunde'];
+                    if ($mk === null): ?>
+                      <span class="mailstatus ms-aus">automatische Antwort ist abgeschaltet</span>
+                <?php elseif ($mk): ?>
+                      <span class="mailstatus ms-ok">✓ Bestätigung verschickt<?=
+                        isset($a['mail_zeit']) ? ' · ' . $e(date('d.m. H:i', strtotime($a['mail_zeit']))) : '' ?></span>
+                <?php else: ?>
+                      <span class="mailstatus ms-fehl">✕ Bestätigung konnte nicht verschickt werden</span>
+                <?php endif;
+                endif;
+                // Kam die Benachrichtigung an den Betrieb selbst durch?
+                if (array_key_exists('mail_betreiber', $a) && !$a['mail_betreiber']): ?>
+                      <span class="mailstatus ms-fehl">✕ Benachrichtigung an dich fehlgeschlagen</span>
+                <?php endif; ?>
             </td>
             <td>
               <a href="mailto:<?= $e($a['email'] ?? '') ?>"><?= $e($a['email'] ?? '') ?></a>
